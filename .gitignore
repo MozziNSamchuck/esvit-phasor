@@ -1,6 +1,9 @@
 # ── Raw IQ data (user provides externally) ────────────────────────────────
 data/IQ_data/
 
+# GT labels (~67MB, 16K .mat files) — share separately via setup.sh or lab server
+data/bolus_v5/gt/
+
 # ── Training outputs ───────────────────────────────────────────────────────
 OUTPUT/
 
