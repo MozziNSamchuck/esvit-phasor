@@ -23,6 +23,18 @@ esvit_phasor/
 
 ---
 
+## 0. 빠른 설정 (lab 서버에서)
+
+GT 라벨과 IQ 데이터 경로를 알고 있다면:
+
+```bash
+bash setup_data.sh /path/to/gt_labels /path/to/PALA_bolus
+```
+
+이 스크립트는 GT 파일을 `data/bolus_v5/gt/`로 복사하고, IQ 데이터 심볼릭 링크를 생성합니다.
+
+---
+
 ## 1. IQ 데이터 다운로드
 
 **PALA 데이터셋** (공개 데이터):
@@ -53,27 +65,46 @@ PALA_InVivoRatBrainBolus_*.mat
 
 ## 2. Pre-train 체크포인트
 
-Fine-tune 스크립트는 pre-train 체크포인트(`checkpoints/pretrain_v3/checkpoint.pth`)를 필요로 합니다.  
-Evaluation만 실행한다면 pre-train 체크포인트도 필요합니다(backbone 초기화 용도).
+Fine-tune/Evaluation에 pre-train 체크포인트(backbone)가 필요합니다.  
+파일이 크기 때문에(~646MB) git에 포함되지 않으며, 직접 학습하거나 lab 서버에서 복사해야 합니다.
 
-### 옵션 A: 직접 Pre-training 실행
+### 체크포인트 위치 요약
+
+| 백본 | 파일 경로 | 사용 실험 | 채널 |
+|---|---|---|---|
+| pretrain_v3 | `checkpoints/pretrain_v3/checkpoint.pth` | v43~v47, **v44(최고)** | 61ch |
+| pretrain_v11 | `checkpoints/pretrain_v11/checkpoint0250.pth` | v12~v36 | 60ch |
+
+### pretrain_v3 (최신, 61ch)
 
 ```bash
-# GPU 8개, 300 epoch, ~2~3일 소요
+# 옵션 A: 직접 학습 (GPU 8개, 300 epoch, ~2~3일)
 bash scripts/run_pretrain_v3.sh
-
-# 완료 후 체크포인트 복사
 mkdir -p checkpoints/pretrain_v3
 cp OUTPUT/pretrain_v3/checkpoint.pth checkpoints/pretrain_v3/
 ```
 
-### 옵션 B: 공유된 체크포인트 사용
-
-연구실 내부 공유 저장소에서 `pretrain_v3/checkpoint.pth`를 받아 배치:
+### 옵션 B: 공유된 체크포인트 사용 (lab 서버)
 
 ```bash
 mkdir -p checkpoints/pretrain_v3
 cp /path/to/shared/pretrain_v3/checkpoint.pth checkpoints/pretrain_v3/
+```
+
+### pretrain_v11 (구버전, 60ch — v12~v36 backbone)
+
+v39/v43/v44/v45를 사용할 경우 불필요. 과거 실험(v12~v36) 재현 시에만 필요.
+
+```bash
+# 옵션 A: 직접 학습 (GPU 8개, 300 epoch, ~9시간)
+bash scripts/run_pretrain_v11.sh
+mkdir -p checkpoints/pretrain_v11
+cp OUTPUT/pretrain_v11/checkpoint0250.pth checkpoints/pretrain_v11/
+# 참고: finetune v12~v36은 최종(300ep)이 아닌 250ep 체크포인트를 사용
+
+# 옵션 B: lab 서버에서 복사
+mkdir -p checkpoints/pretrain_v11
+cp /path/to/shared/pretrain_v11/checkpoint0250.pth checkpoints/pretrain_v11/
 ```
 
 ---
